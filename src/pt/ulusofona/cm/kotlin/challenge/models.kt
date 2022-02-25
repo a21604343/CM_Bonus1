@@ -22,7 +22,7 @@ class models {
         var dataDeNascimento : Data,
         var carta : Carta,
         var posicao: Posicao
-    ){
+    ) : interfaces.Movimentavel{
 
         fun comprarVeiculo(veiculo : Veiculo){
             if (!veiculos.containsValue(veiculo)){
@@ -55,6 +55,9 @@ class models {
 
         }
         fun moverVeiculoPara(identificador: String , x : Int, y : Int){
+            if (carta.equals(null)){
+                throw exceptions.PessoaSemCartaException(nome)
+            }
             veiculos[identificador]?.posicao?.alterarPosicao(x,y)
 
         }
@@ -75,11 +78,17 @@ class models {
                 if(mes.removeRange(6,8).toInt() == dataDeNascimento.mes.toInt()){
                     if (mes.removeRange(4,6).toInt() > dataDeNascimento.dia.toInt()){
                         return temCarta(true)
+                    }else{
+                        throw exceptions.MenorDeIdadeException()
                     }
                 }
             }
-            return temCarta(false)
+            throw exceptions.MenorDeIdadeException()
 
+        }
+
+        override fun moverPara(x: Int, y: Int) {
+            posicao.alterarPosicao(x,y)
         }
 
         override fun toString(): String {
@@ -90,9 +99,13 @@ class models {
         var identificador : String,
         var posicao : Posicao,
         var dataDeAquisicao : Data
-    ){
+    ) : interfaces.Movimentavel{
         fun requerCarta() : Boolean{
             return true
+        }
+
+        override fun moverPara(x: Int, y: Int) {
+            posicao.alterarPosicao(x,y)
         }
     }
     data class Posicao(
@@ -100,6 +113,9 @@ class models {
         var y : Int = 0
     ){
         fun alterarPosicao(xNew : Int, yNew : Int){
+            if(x == xNew && y == yNew){
+                throw exceptions.AlterarPosicaoException(x,y)
+            }
             x = xNew
             y = yNew
         }
@@ -108,7 +124,29 @@ class models {
         }
     }
 
-     class Carro(identificador: String, posicao: Posicao, date: Data,var motor: Motor) : Veiculo(identificador,posicao,date){
+     class Carro(identificador: String, posicao: Posicao, date: Data,var motor: Motor) : Veiculo(identificador,posicao,date), interfaces.Ligavel{
+
+         override fun ligar() {
+             if (motor.ligado){
+                 throw exceptions.VeiculoLigadoException()
+             }
+             motor.ligado = true
+         }
+
+         override fun desligar() {
+             if (!motor.ligado){
+                 throw  exceptions.VeiculoDesligadoException()
+             }
+             motor.ligado = false
+         }
+
+         override fun estaLigado(): Boolean {
+            if (motor.ligado) {
+                return true
+            }
+                return false
+
+         }
 
 
         override fun toString(): String {
