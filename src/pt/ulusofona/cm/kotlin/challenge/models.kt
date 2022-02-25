@@ -15,17 +15,22 @@ class models {
             return "$dia-$mes-$ano"
         }
     }
+    class Carta{
+        var id : Int = 0
+
+    }
 
     data class Pessoa(
         var nome : String,
         var veiculos : HashMap<String,Veiculo>,
         var dataDeNascimento : Data,
-        var carta : Carta,
+        var carta : Carta? = null,
         var posicao: Posicao
     ) : interfaces.Movimentavel{
 
         fun comprarVeiculo(veiculo : Veiculo){
             if (!veiculos.containsValue(veiculo)){
+                veiculo.dataDeAquisicao = Data(LocalDateTime.now().year.toString(),LocalDateTime.now().monthValue.toString(),LocalDateTime.now().dayOfMonth.toString())
                 veiculos.put(veiculo.identificador,veiculo)
             }
         }
@@ -44,6 +49,7 @@ class models {
                 val newVeiculo = veiculos[identificador]
                 if (newVeiculo != null) {
                     veiculos.remove(identificador)
+                    newVeiculo.dataDeAquisicao = Data(LocalDateTime.now().year.toString(),LocalDateTime.now().monthValue.toString(),LocalDateTime.now().dayOfMonth.toString())
                     comprador.veiculos.put(identificador,newVeiculo)
                 }else{
                     throw exceptions.VeiculoNaoEncontradoException(identificador)
@@ -55,14 +61,17 @@ class models {
 
         }
         fun moverVeiculoPara(identificador: String , x : Int, y : Int){
-            if (carta.equals(null)){
+            if (carta == null){
                 throw exceptions.PessoaSemCartaException(nome)
             }
             veiculos[identificador]?.posicao?.alterarPosicao(x,y)
 
         }
-        fun temCarta(valor : Boolean) : Boolean {
-            return tirarCarta()
+        fun temCarta() : Boolean {
+            if (carta != null){
+                return true
+            }
+            return false
         }
         fun tirarCarta() : Boolean{
             val current = LocalDateTime.now()
@@ -73,11 +82,11 @@ class models {
                 var mes = formatted.removeRange(0,4)
 
                 if(mes.removeRange(6,8).toInt() > dataDeNascimento.mes.toInt() ){
-                    return temCarta(true)
+                    carta = Carta()
                 }
                 if(mes.removeRange(6,8).toInt() == dataDeNascimento.mes.toInt()){
                     if (mes.removeRange(4,6).toInt() > dataDeNascimento.dia.toInt()){
-                        return temCarta(true)
+                        carta = Carta()
                     }else{
                         throw exceptions.MenorDeIdadeException()
                     }
@@ -161,9 +170,7 @@ class models {
         }
     }
 
-    class Carta{
 
-    }
 
     data class Motor(
         var cavalos : Int,
