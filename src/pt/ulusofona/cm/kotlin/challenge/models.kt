@@ -74,6 +74,9 @@ class models {
             return false
         }
         fun tirarCarta() : Boolean{
+
+
+
             val current = LocalDateTime.now()
             val formatter = DateTimeFormatter.BASIC_ISO_DATE
             val formatted = current.format(formatter)
@@ -175,7 +178,7 @@ class models {
     data class Motor(
         var cavalos : Int,
         var cilindrada : Int,
-        var ligado : Boolean
+        var ligado : Boolean = false
     ){
         override fun toString(): String {
             return "Motor | $cavalos | $cilindrada"
